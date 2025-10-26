@@ -4,87 +4,108 @@ import java.util.Random;
 
 public class Tablero {
 
+    private Celda[][] celdas;
     private int filas;
     private int columnas;
-    private int totalMinas;
-    private Celda[][] celdas;
+    private int cantidadMinas;
 
-
-    public Tablero(int filas, int columnas, int totalMinas){
+    public Tablero(int filas, int columnas, int cantidadMinas) {
         this.filas = filas;
         this.columnas = columnas;
-        this.totalMinas = totalMinas;
+        this.cantidadMinas = cantidadMinas;
         inicializarTablero();
-        colocarMinas(totalMinas);
-        calcularMinasAlrededor();
     }
-    public int getTotalMinas() {
-        return totalMinas;
-    }
-    public void setTotalMinas(int totalMinas) {
-        this.totalMinas = totalMinas;
-    }
-    public int getFilas() {
-        return filas;
-    }
-    public void setFilas(int filas) {
-        this.filas = filas;
-    }
-    public int getColumnas() {
-        return columnas;
-    }
-    public void setColumnas(int columnas) {
-        this.columnas = columnas;
-    }
-    public Celda[][] getCeldas() {
-        return celdas;
-    }
-    public void inicializarTablero(){
+
+    // Inicializa todas las celdas vacias y luego coloca minas
+    private void inicializarTablero() {
         celdas = new Celda[filas][columnas];
-        
-        for(int i = 0; i < filas; i++){
-            for(int j = 0; j < columnas; j++){
-                celdas[i][j] = (new Celda(false));
+
+        // Crear celdas vacías
+        for (int i = 0; i < filas; i++) {
+            for (int j = 0; j < columnas; j++) {
+                celdas[i][j] = new Celda(i, j, false);
             }
         }
+
+        colocarMinas();
+        calcularMinasAlrededor();
     }
-    public void colocarMinas(int numeroMinas) {
+
+    // Coloca minas aleatoriamente
+    private void colocarMinas() {
         Random rand = new Random();
         int minasColocadas = 0;
 
-        while (minasColocadas < numeroMinas) {
-            int fila = rand.nextInt(filas);
-            int columna = rand.nextInt(columnas);
+        while (minasColocadas < cantidadMinas) {
+            int i = rand.nextInt(filas);
+            int j = rand.nextInt(columnas);
 
-            if (!celdas[fila][columna].getTieneMina()) {
-                celdas[fila][columna].setTieneMina(true);
+            if (!celdas[i][j].esMina()) {
+                celdas[i][j].setEsMina(true);
                 minasColocadas++;
             }
         }
     }
-    public void calcularMinasAlrededor() {
+
+    // Calcula  minas  alrededor de cada celda
+    private void calcularMinasAlrededor() {
         for (int i = 0; i < filas; i++) {
             for (int j = 0; j < columnas; j++) {
-                if (!celdas[i][j].getTieneMina()) {
+                if (!celdas[i][j].esMina()) {
                     int contador = contarMinasVecinas(i, j);
-                    celdas[i][j].setCantidadMinasAlrededor(contador);
+                    celdas[i][j].setMinasAlrededor(contador);
                 }
             }
         }
     }
+
+    // Cuenta las minas alrededor de una coordenada
     private int contarMinasVecinas(int fila, int columna) {
         int contador = 0;
-        for (int i = -1; i <= 1; i++) {
-            for (int j = -1; j <= 1; j++) {
-                int f = fila + i;
-                int c = columna + j;
-                if (f >= 0 && f < filas && c >= 0 && c < columnas && !(i == 0 && j == 0)) {
-                    if (celdas[f][c].getTieneMina()) {
-                        contador++;
+
+        for (int i = fila - 1; i <= fila + 1; i++) {
+            for (int j = columna - 1; j <= columna + 1; j++) {
+                if (i >= 0 && i < filas && j >= 0 && j < columnas) {
+                    if (celdas[i][j].esMina()) contador++;
+                }
+            }
+        }
+
+        return contador;
+    }
+
+    public void revelarCelda(int fila, int columna) {
+        if (fila < 0 || fila >= filas || columna < 0 || columna >= columnas)
+            return;
+
+        Celda celda = celdas[fila][columna];
+        if (celda.estaRevelada())
+            return;
+
+        celda.setRevelada(true);
+
+        // Si no tiene minas alrededor y no es mina revela en cascada
+        if (celda.getMinasAlrededor() == 0 && !celda.esMina()) {
+            for (int i = fila - 1; i <= fila + 1; i++) {
+                for (int j = columna - 1; j <= columna + 1; j++) {
+                    if (!(i == fila && j == columna)) {
+                        revelarCelda(i, j);
                     }
                 }
             }
         }
-        return contador;
+    }
+
+    public Celda[][] getCeldas() {
+        return celdas;
+    }
+
+    public void mostrarTablero() {
+        for (int i = 0; i < filas; i++) {
+            for (int j = 0; j < columnas; j++) {
+                System.out.print(celdas[i][j].toString() + " ");
+            }
+            System.out.println();
+        }
     }
 }

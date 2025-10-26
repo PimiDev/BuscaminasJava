@@ -1,40 +1,43 @@
 package GUI;
 
 import Logica.Celda;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.text.Font;
 
 public class CeldaUI extends Button {
 
     private Celda celda;
-    private int fila;
-    private int columna;
+    private static final int TAMANIO = 60; // tamaño visual del botón en píxeles
 
-    public CeldaUI(Celda celda, int fila, int columna) {
+    public CeldaUI(Celda celda) {
         this.celda = celda;
-        this.fila = fila;
-        this.columna = columna;
-        actualizarVisual();
+
+        setPrefSize(TAMANIO, TAMANIO);
+        setFont(Font.font(18));
+        setAlignment(Pos.CENTER);
+        setEstiloNormal();
     }
-    public void actualizarVisual() {
-        if (celda.getRevelada()) {
-            setDisable(true);
-            if (celda.getTieneMina()) {
-                setText("💣");
-                setStyle("-fx-background-color: #ff4c4c;");
-            } else {
-                int n = celda.getCantidadMinasAlrededor();
-                setText(n > 0 ? String.valueOf(n) : "");
-                setStyle("-fx-background-color: #d0d0d0;");
-            }
-        } else if (celda.getMarcada()) {
-            setText("🚩");
-            setStyle("-fx-background-color: #fce94f;");
-        } else {
+
+    public void actualizar() {
+        if (!celda.estaRevelada()) {
             setText("");
-            setStyle("-fx-background-color: #b0b0b0;");
+            setEstiloNormal();
+        } else if (celda.esMina()) {
+            setText("💣");
+            setStyle("-fx-background-color: #ff6b6b; -fx-border-color: #555;");
+        } else {
+            int minas = celda.getMinasAlrededor();
+            setText(minas > 0 ? String.valueOf(minas) : "");
+            setStyle("-fx-background-color: #b2e0b2; -fx-border-color: #4b8b4b;");
         }
     }
 
+    private void setEstiloNormal() {
+        setStyle("-fx-background-color: #bdbdbd; -fx-border-color: #888;");
+    }
 
-
+    public Celda getCelda() {
+        return celda;
+    }
 }
