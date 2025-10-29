@@ -9,6 +9,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 public class BuscaminasGUI extends Application {
@@ -17,7 +18,7 @@ public class BuscaminasGUI extends Application {
     private GridPane grid;
     private StackPane root;
     private CeldaUI[][] botones;
-
+    private Button botonReiniciar;
     private int filasActuales;
     private int columnasActuales;
 
@@ -125,14 +126,13 @@ public class BuscaminasGUI extends Application {
                         actualizarTableroVisual();
 
                         if (celda.esMina()) {
-                            mostrarMensaje("Has perdido", "Pisaste una bombota");
-                            mostrarBotonReiniciar();
                             revelarTodo();
+                            mostrarMensaje("Has perdido", "Pisaste una mina");
+                            botonReiniciar.setVisible(true);
                         } else if (verificarVictoria()) {
-                            mostrarMensaje("Ganaste", "No pisaste ninguna mina wey");
-                            mostrarBotonReiniciar();
                             revelarTodo();
-
+                            mostrarMensaje("¡Ganaste!", "No pisaste ninguna mina");
+                            botonReiniciar.setVisible(true);
                         }
                     }
                 });
@@ -141,8 +141,20 @@ public class BuscaminasGUI extends Application {
             }
         }
 
+        // Crear boton de reinicio (invisible al inicio)
+        botonReiniciar = new Button("Reiniciar");
+        botonReiniciar.setStyle("-fx-font-size: 16px; -fx-background-color: #ffcc00; "
+                + "-fx-text-fill: #333; -fx-background-radius: 15; -fx-padding: 8 20 8 20;");
+        botonReiniciar.setVisible(false);
+        botonReiniciar.setOnAction(e -> pantallaInicio());
+
+
+        HBox hbox = new HBox(20);
+        hbox.setAlignment(Pos.CENTER);
+        hbox.getChildren().addAll(grid, botonReiniciar);
+
         root.getChildren().clear();
-        root.getChildren().add(grid);
+        root.getChildren().add(hbox);
     }
 
     private void actualizarTableroVisual() {
